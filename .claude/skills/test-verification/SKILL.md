@@ -1,6 +1,7 @@
 ---
 name: test-verification
 description: 実装後のテスト作成・検証。SDDにおけるテストは実装の検証手段。Use when「テストを書いて」「テストを追加して」「カバレッジを上げたい」と言われた時。
+argument-hint: "[対象ファイル or 機能名]"
 ---
 
 # テスト検証

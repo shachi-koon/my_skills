@@ -2,6 +2,7 @@
 name: non-functional-requirements
 description: 非機能要件（性能/可用性/セキュリティ）の最低ライン決定。Use when「非機能要件を決めたい」「性能要件は？」「セキュリティ要件を整理したい」と言われた時。明示的に呼び出して使用。
 disable-model-invocation: true
+argument-hint: "[プロジェクト名]"
 ---
 
 # 非機能要件定義

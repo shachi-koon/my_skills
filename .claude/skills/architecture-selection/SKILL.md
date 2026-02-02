@@ -1,6 +1,7 @@
 ---
 name: architecture-selection
 description: アーキテクチャ選定の観点・比較プロセス。システム/アプリ/インフラすべてのレベルに対応。Use when「アーキテクチャを決めたい」「技術選定したい」「構成を検討したい」と言われた時。
+argument-hint: "[システム名 or 選定対象]"
 ---
 
 # アーキテクチャ選定

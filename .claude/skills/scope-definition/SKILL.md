@@ -2,6 +2,7 @@
 name: scope-definition
 description: スコープ/スコープ外の明確化。後出し要求を防ぐ。Use when「スコープを決めたい」「何をやる/やらないを整理したい」「範囲を明確にしたい」と言われた時。明示的に呼び出して使用。
 disable-model-invocation: true
+argument-hint: "[プロジェクト名]"
 ---
 
 # スコープ定義

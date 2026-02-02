@@ -1,6 +1,7 @@
 ---
 name: sdd-workflow
 description: 仕様駆動開発（Spec Driven Development）の進め方。仕様→実装→テストの順で開発を進める。Use when「開発を始めたい」「実装を進めたい」「SDDで進めて」と言われた時。
+argument-hint: "[機能名 or 仕様書パス]"
 ---
 
 # 仕様駆動開発ワークフロー

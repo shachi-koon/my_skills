@@ -9,6 +9,7 @@
 - **普遍原則**: どのプロジェクトでも守るべき18のルール
 - **推奨Skills**: お任せ時の標準的なワークフロー（8つ）
 - **壁打ちSkills**: プロジェクトごとに対話で決める（6つ）
+- **Agents**: 品質保証・進捗管理のサブエージェント（2つ）
 - **Hooks**: 自動フォーマット、機密ファイル保護
 
 ## 思想
@@ -34,6 +35,10 @@
 .
 ├── CLAUDE.md                    # 普遍原則（18項目）
 ├── settings.json                # Hooks設定
+├── agents/                      # サブエージェント
+│   ├── qa-general.md            # 品質保証エージェント
+│   └── status-updater.md        # 進捗管理エージェント
+│
 └── skills/
     ├── 推奨Skills（自動呼び出し）
     │   ├── sdd-workflow/        # 仕様駆動開発
@@ -66,8 +71,9 @@ cd claude-code-foundation
 # ファイルを配置
 cp CLAUDE.md ~/.claude/CLAUDE.md
 cp settings.json ~/.claude/settings.json
-mkdir -p ~/.claude/skills
+mkdir -p ~/.claude/skills ~/.claude/agents
 cp -r skills/* ~/.claude/skills/
+cp -r agents/* ~/.claude/agents/
 ```
 
 ### 方法2: プロジェクト単位で配置
@@ -79,6 +85,7 @@ cp .claude-foundation/CLAUDE.md ./CLAUDE.md
 mkdir -p .claude
 cp .claude-foundation/settings.json .claude/settings.json
 cp -r .claude-foundation/skills .claude/skills
+cp -r .claude-foundation/agents .claude/agents
 ```
 
 ## 使い方
@@ -97,12 +104,39 @@ cp -r .claude-foundation/skills .claude/skills
 開発フェーズに応じて明示的に呼び出します。
 
 ```
-/skill:requirements-definition      # 要件定義フェーズ
-/skill:non-functional-requirements  # 非機能要件定義
-/skill:scope-definition             # スコープ定義
-/skill:design-review                # 設計レビュー
-/skill:task-breakdown               # タスク分解
-/skill:release-planning             # リリース計画
+/requirements-definition      # 要件定義フェーズ
+/non-functional-requirements  # 非機能要件定義
+/scope-definition             # スコープ定義
+/design-review                # 設計レビュー
+/task-breakdown               # タスク分解
+/release-planning             # リリース計画
+```
+
+### Agents（サブエージェント）
+
+品質保証や進捗管理をサブエージェントに委譲できます。
+
+| Agent | 役割 | 使用タイミング |
+|-------|------|---------------|
+| `qa-general` | 成果物の品質チェック | レビュー依頼時、QC実施時 |
+| `status-updater` | 進捗状況の追跡・更新 | フェーズ完了時、進捗確認時 |
+
+**呼び出し例:**
+```
+「品質チェックして」→ qa-general が品質検査を実施
+「進捗を確認して」→ status-updater が状況を整理
+```
+
+**qa-generalの出力例:**
+```
+### QC結果: Pass
+スコア: 85/100
+
+#### 指摘事項
+1. [ドキュメント]: 曖昧表現「適切に」を具体化 (重要度: Medium)
+
+#### 修正推奨
+- 「適切にバリデーション」→「入力値を正規表現でチェック」
 ```
 
 ## 普遍原則（18項目）
@@ -171,8 +205,10 @@ description: スキルの説明。Use when「〇〇したい」と言われた�
 
 ## 参考資料
 
+- [Claude Code公式ドキュメント](https://code.claude.com/docs)
+- [Extend Claude with skills](https://code.claude.com/docs/en/skills)
+- [Manage Claude's memory](https://code.claude.com/docs/en/memory)
 - [Claude Code Best Practices](https://www.anthropic.com/engineering/claude-code-best-practices)
-- [The Complete Guide to Building Skills for Claude](https://claude.com/blog/complete-guide-to-building-skills-for-claude)
 - [everything-claude-code](https://github.com/anthropics/everything-claude-code)
 
 ## ライセンス

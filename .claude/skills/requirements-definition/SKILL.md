@@ -2,6 +2,7 @@
 name: requirements-definition
 description: 機能要件のヒアリング・整理。対話形式で要件を明確化。Use when「要件を整理したい」「機能を定義したい」「何を作るか決めたい」と言われた時。明示的に呼び出して使用。
 disable-model-invocation: true
+argument-hint: "[プロジェクト名 or 機能名]"
 ---
 
 # 要件定義

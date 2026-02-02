@@ -1,6 +1,7 @@
 ---
 name: document-generator
 description: 仕様書・設計書・APIリファレンスなどのドキュメント生成。Use when「ドキュメントを作って」「仕様書を書いて」「設計書を作成して」「APIリファレンスを作って」と言われた時。
+argument-hint: "[ドキュメント種別: 要件/設計/API]"
 ---
 
 # ドキュメント生成

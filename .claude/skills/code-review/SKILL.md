@@ -1,6 +1,8 @@
 ---
 name: code-review
 description: コードレビューの観点と手順。セキュリティ、性能、保守性、テストの観点でレビュー。Use when「レビューして」「コードをチェックして」「PRを見て」と言われた時。
+argument-hint: "[ファイルパス or PR番号]"
+allowed-tools: Read, Grep, Glob
 ---
 
 # コードレビュー

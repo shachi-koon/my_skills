@@ -2,6 +2,7 @@
 name: release-planning
 description: リリース手順・切り戻し計画の策定。手順と切り戻しはセットで定義。Use when「リリース計画を立てたい」「デプロイ手順を決めたい」「切り戻し手順を作りたい」と言われた時。明示的に呼び出して使用。
 disable-model-invocation: true
+argument-hint: "[リリース名 or バージョン]"
 ---
 
 # リリース計画

@@ -2,6 +2,7 @@
 name: design-review
 description: 設計選択肢の比較・決定支援。アーキテクチャ、DB設計、API設計等のレビュー。Use when「設計をレビューしたい」「設計の妥当性を確認したい」「設計を決めたい」と言われた時。明示的に呼び出して使用。
 disable-model-invocation: true
+argument-hint: "[設計書パス or 設計対象]"
 ---
 
 # 設計レビュー

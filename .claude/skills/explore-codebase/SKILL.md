@@ -1,6 +1,8 @@
 ---
 name: explore-codebase
 description: コードベース調査の進め方。構造理解、パターン発見、影響範囲調査に使用。Use when「コードを調べて」「構造を教えて」「どこを修正すればいい？」と言われた時。
+argument-hint: "[調査対象 or キーワード]"
+allowed-tools: Read, Grep, Glob
 ---
 
 # コードベース調査

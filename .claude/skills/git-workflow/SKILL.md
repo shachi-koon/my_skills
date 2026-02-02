@@ -1,6 +1,7 @@
 ---
 name: git-workflow
 description: ブランチ戦略、コミット規約、PR作成の標準ワークフロー。Use when「ブランチを切りたい」「コミットしたい」「PRを作りたい」「Git操作を教えて」と言われた時。
+argument-hint: "[操作: branch/commit/pr]"
 ---
 
 # Gitワークフロー

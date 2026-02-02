@@ -2,6 +2,7 @@
 name: task-breakdown
 description: タスク分解・チケット作成支援。1タスク=1PRの粒度で分解。Use when「タスクを分解したい」「チケットを作りたい」「作業を洗い出したい」と言われた時。明示的に呼び出して使用。
 disable-model-invocation: true
+argument-hint: "[機能名 or 設計書パス]"
 ---
 
 # タスク分解
