@@ -1,0 +1,70 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys; data=json.load(sys.stdin); path=data.get('tool_input',{}).get('file_path',''); blocked=['.env','.env.local','.env.production','/secrets/','/credentials/','.secret']; sys.exit(2) if any(b in path for b in blocked) else sys.exit(0)\" 2>&1 || echo '機密ファイルへのアクセスはブロックされました' >&2",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys; data=json.load(sys.stdin); cmd=data.get('tool_input',{}).get('command',''); dangerous=['rm -rf /','rm -rf ~','rm -rf .','> /dev/sda',':(){:|:&};:']; sys.exit(2) if any(d in cmd for d in dangerous) else sys.exit(0)\" 2>&1 || echo '危険なコマンドはブロックされました' >&2",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | xargs -I {} sh -c 'if echo {} | grep -qE \"\\.(ts|tsx|js|jsx|json|md)$\"; then npx prettier --write {} 2>/dev/null || true; fi'",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path' | xargs -I {} sh -c 'if echo {} | grep -qE \"\\.(ts|tsx)$\"; then npx tsc --noEmit 2>&1 | head -20 || true; fi'",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(npm run:*)",
+      "Bash(npx:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./credentials/**)",
+      "Write(./package-lock.json)",
+      "Write(./yarn.lock)",
+      "Bash(rm -rf:*)"
+    ]
+  }
+}

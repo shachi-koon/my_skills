@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local settings (should not be committed)
+*.local.md
+*.local.json
+CLAUDE.local.md
+settings.local.json
+
+# Temporary files
+*.tmp
+*.temp
