@@ -94,3 +94,16 @@ allowed-tools: Read, Grep, Glob
 - 指摘は具体的に（行番号、コード例を含める）
 - 改善案を必ず併記
 - 良い点も伝える
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: レビュー品質のセルフチェック
+  - web-researcher: セキュリティ脆弱性・ベストプラクティスの確認
+
+subagent_policy:
+  - 指摘事項は評価基準に紐づけて根拠を明記
+  - 最小差分での改善案を優先

@@ -158,3 +158,15 @@ npm run test -- path/to/file.test.ts
 - [ ] テストが独立しているか（他テストに依存しない）
 - [ ] テストが再現可能か（何度実行しても同じ結果）
 - [ ] **テストを通すための実装改修をしていないか**
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: テストの品質チェック（カバレッジ、テストケース品質）
+
+subagent_policy:
+  - テスト改変禁止の遵守を確認
+  - テストを通すための実装改修は絶対禁止

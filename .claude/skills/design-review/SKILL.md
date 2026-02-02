@@ -129,3 +129,16 @@ argument-hint: "[設計書パス or 設計対象]"
 - Criticalがある場合は承認不可
 - 代替案は必ず併記
 - 決定事項は決定ログとして残す
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: 設計の品質チェック（要件整合性、失敗時挙動定義）
+  - web-researcher: 設計パターン・ベストプラクティスの調査
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

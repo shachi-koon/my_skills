@@ -94,3 +94,16 @@ argument-hint: "[システム名 or 選定対象]"
 
 ## 承認ポイント
 アーキテクチャ決定は設計フェーズの承認ポイントで確定する。
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: 選定プロセスの品質チェック（選択肢の網羅性、トレードオフの客観性）
+  - web-researcher: アーキテクチャパターン・技術動向の調査
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

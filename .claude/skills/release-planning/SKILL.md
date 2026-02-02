@@ -182,3 +182,16 @@ Q18. エスカレーションルートは？
 - [ ] 連絡体制が整っているか
 - [ ] バックアップ取得が含まれているか
 - [ ] 関係者への事前連絡が計画されているか
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: リリース計画の品質チェック（手順の実行可能性、切り戻しの完全性）
+  - web-researcher: デプロイ設定・インフラ仕様の確認
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

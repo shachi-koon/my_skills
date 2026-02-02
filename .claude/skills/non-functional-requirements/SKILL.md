@@ -138,3 +138,16 @@ Q20. 切り戻し手順は必要か？
 - 「最低ライン」は妥協点ではなく「これ以下は許容不可」の基準
 - 目標値と最低ラインは分けて記載
 - 測定方法も併記（後で検証できるように）
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: 非機能要件の品質チェック（数値化、測定方法の妥当性）
+  - web-researcher: 性能基準・業界標準の調査
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

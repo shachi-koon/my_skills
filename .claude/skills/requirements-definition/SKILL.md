@@ -117,3 +117,16 @@ Q17. 法規制・コンプライアンス要件はありますか？
 - [ ] ACはYes/No判定可能か
 - [ ] 確認方法が明記されているか
 - [ ] 優先度が設定されているか
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: 要件定義書の品質チェック（曖昧表現排除、AC検証）
+  - web-researcher: 技術要件の実現可能性確認
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

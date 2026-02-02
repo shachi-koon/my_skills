@@ -125,3 +125,16 @@ argument-hint: "[機能名 or 処理名]"
 - [ ] ログに機密情報が含まれていないか
 - [ ] ユーザー向けメッセージが適切か
 - [ ] 最悪ケース（全リトライ失敗）の動作を定義したか
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: エラーハンドリング設計の品質チェック（網羅性、具体性）
+  - web-researcher: リトライ戦略・ベストプラクティスの調査
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

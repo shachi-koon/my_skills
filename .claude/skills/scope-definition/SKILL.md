@@ -129,3 +129,15 @@ Q13. ステークホルダー間で認識がずれている点は？
 - 次フェーズ対応予定のものは明記
 - 曖昧な表現（「基本的には」「原則として」）を避ける
 - ステークホルダー全員の合意を得る
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: スコープ定義書の品質チェック（曖昧表現排除、境界条件の明確性）
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

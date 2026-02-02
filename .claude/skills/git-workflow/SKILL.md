@@ -136,3 +136,15 @@ git push origin feature/123-login-function
 - `main`/`develop`への直接コミット禁止
 - Force pushは原則禁止（共有ブランチでは絶対禁止）
 - マージ前にdevelopを取り込んでコンフリクト解消
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: コミット・PR品質のチェック（規約準拠、追跡可能性）
+
+subagent_policy:
+  - コミットメッセージにはチケット番号を必ず含める
+  - 変更経緯をチケットに記録

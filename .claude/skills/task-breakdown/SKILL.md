@@ -146,3 +146,15 @@ argument-hint: "[機能名 or 設計書パス]"
 - [ ] 依存関係が整理されているか
 - [ ] 見積もりが妥当か（L以上は要分割検討）
 - [ ] ドキュメント更新タスクが含まれているか
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: タスク分解の品質チェック（粒度適正、Done条件の明確性）
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

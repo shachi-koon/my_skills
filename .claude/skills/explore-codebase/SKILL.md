@@ -112,3 +112,15 @@ A → B → C → D
 
 ## サブエージェント活用
 大規模な調査は `Explore` サブエージェントに委譲することを推奨。
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: 調査結果の品質チェック（網羅性、正確性）
+
+subagent_policy:
+  - 調査結果にはファイルパス・行番号を必ず明記
+  - 推測ではなくファクトに基づく情報を提示

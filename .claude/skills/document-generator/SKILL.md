@@ -146,3 +146,15 @@ curl -X POST ...
 - [ ] スコープ内/外が明記されているか
 - [ ] 未決事項に責任者・期限があるか
 - [ ] 3年目エンジニアが読んで理解できるか
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: ドキュメントの品質チェック（曖昧表現排除、必須セクション確認）
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す

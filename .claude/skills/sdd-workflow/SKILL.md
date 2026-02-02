@@ -57,3 +57,16 @@ argument-hint: "[機能名 or 仕様書パス]"
 - 実装完了後 → レビュー・マージの承認
 
 **承認なしでは次に進まないこと。**
+
+## Resources
+- evaluation: ./evaluation/evaluation_criteria.md
+
+## Subagent連携
+
+recommended_subagents:
+  - qa-general: 仕様準拠の検証、テスト品質チェック
+  - status-updater: 各フェーズ完了時の進捗更新
+
+subagent_policy:
+  - QC/チェック/フィードバックは必ずSubagentへ委譲
+  - 指摘の反映有無と理由を成果物に残す
