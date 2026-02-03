@@ -186,6 +186,36 @@
 - **自動フォーマット**: Prettier（.ts, .tsx, .js, .jsx, .json, .md）
 - **型チェック**: TypeScript（.ts, .tsx）
 
+**注意**: HooksはPython3で実装されています。Python3がインストールされていない環境では動作しません。
+
+---
+
+## エージェント（Agents）
+
+### 3つのサブエージェント
+
+| Agent | 役割 | 呼び出し例 |
+|-------|------|----------|
+| `qa-general` | 成果物の品質チェック | 「品質チェックして」 |
+| `status-updater` | 進捗状況の追跡・更新 | 「進捗を確認して」 |
+| `web-researcher` | 技術情報の検証・調査 | 「〇〇のAPI仕様を調査して」 |
+
+### 評価基準（Evaluation Criteria）
+
+各スキルには `evaluation/evaluation_criteria.md` が用意されています。
+
+**評価の仕組み:**
+
+| 区分 | 判定 |
+|------|------|
+| 構造チェック | Pass/Fail（必須項目の有無） |
+| 内容チェック | 100点満点のスコアリング |
+
+**最終判定:**
+- **Pass**: 全Critical項目Pass + 80点以上
+- **Conditional Pass**: 全Critical項目Pass + 60-79点
+- **Fail**: Critical項目Failあり または 60点未満
+
 ---
 
 ## 数値目標
@@ -346,12 +376,19 @@ project/
 ### 基盤のインストール
 
 ```bash
-# この基盤ファイルをユーザーレベルに配置
-cp -r ~/Documents/source/my_skills/.claude/* ~/.claude/
+# リポジトリをクローン
+git clone https://github.com/YOUR_USERNAME/claude-code-foundation.git
+cd claude-code-foundation
 
-# または、シンボリックリンクで参照（推奨）
-ln -s ~/Documents/source/my_skills/.claude ~/.claude
+# ファイルをユーザーレベルに配置
+cp CLAUDE.md ~/.claude/CLAUDE.md
+cp settings.json ~/.claude/settings.json
+mkdir -p ~/.claude/skills ~/.claude/agents
+cp -r skills/* ~/.claude/skills/
+cp -r agents/* ~/.claude/agents/
 ```
+
+**注意**: Hooksの実行にはPython3が必要です。
 
 ---
 

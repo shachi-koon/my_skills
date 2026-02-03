@@ -9,7 +9,7 @@
 - **普遍原則**: どのプロジェクトでも守るべき18のルール
 - **推奨Skills**: お任せ時の標準的なワークフロー（8つ）
 - **壁打ちSkills**: プロジェクトごとに対話で決める（6つ）
-- **Agents**: 品質保証・進捗管理のサブエージェント（2つ）
+- **Agents**: 品質保証・進捗管理・技術調査のサブエージェント（3つ）
 - **Hooks**: 自動フォーマット、機密ファイル保護
 
 ## 思想
@@ -37,7 +37,8 @@
 ├── settings.json                # Hooks設定
 ├── agents/                      # サブエージェント
 │   ├── qa-general.md            # 品質保証エージェント
-│   └── status-updater.md        # 進捗管理エージェント
+│   ├── status-updater.md        # 進捗管理エージェント
+│   └── web-researcher.md        # 技術調査エージェント
 │
 └── skills/
     ├── 推奨Skills（自動呼び出し）
@@ -104,12 +105,12 @@ cp -r .claude-foundation/agents .claude/agents
 開発フェーズに応じて明示的に呼び出します。
 
 ```
-/requirements-definition      # 要件定義フェーズ
-/non-functional-requirements  # 非機能要件定義
-/scope-definition             # スコープ定義
-/design-review                # 設計レビュー
-/task-breakdown               # タスク分解
-/release-planning             # リリース計画
+/skill:requirements-definition      # 要件定義フェーズ
+/skill:non-functional-requirements  # 非機能要件定義
+/skill:scope-definition             # スコープ定義
+/skill:design-review                # 設計レビュー
+/skill:task-breakdown               # タスク分解
+/skill:release-planning             # リリース計画
 ```
 
 ### Agents（サブエージェント）
@@ -120,11 +121,13 @@ cp -r .claude-foundation/agents .claude/agents
 |-------|------|---------------|
 | `qa-general` | 成果物の品質チェック | レビュー依頼時、QC実施時 |
 | `status-updater` | 進捗状況の追跡・更新 | フェーズ完了時、進捗確認時 |
+| `web-researcher` | 技術情報の検証・調査 | API仕様確認、ライブラリ調査、実現可能性確認時 |
 
 **呼び出し例:**
 ```
 「品質チェックして」→ qa-general が品質検査を実施
 「進捗を確認して」→ status-updater が状況を整理
+「〇〇のAPI仕様を調査して」→ web-researcher が技術情報を調査
 ```
 
 **qa-generalの出力例:**
@@ -137,6 +140,36 @@ cp -r .claude-foundation/agents .claude/agents
 
 #### 修正推奨
 - 「適切にバリデーション」→「入力値を正規表現でチェック」
+```
+
+### 評価基準（Evaluation Criteria）
+
+各スキルには `evaluation/evaluation_criteria.md` が用意されており、qa-generalエージェントはこれを参照して品質判定を行います。
+
+**評価の仕組み:**
+
+| 区分 | チェック内容 | 判定 |
+|------|-------------|------|
+| 構造チェック | 必須セクション・Critical項目の有無 | Pass/Fail |
+| 内容チェック | 中身の質（100点満点） | スコアリング |
+
+**最終判定:**
+- **Pass**: 全Criticalチェック項目がPass かつ スコア80点以上
+- **Conditional Pass**: 全Criticalチェック項目がPass かつ スコア60-79点
+- **Fail**: CriticalチェックにFailあり または スコア60点未満
+
+**ファイル配置:**
+```
+skills/
+├── code-review/
+│   ├── SKILL.md
+│   └── evaluation/
+│       └── evaluation_criteria.md  # ← 評価基準
+├── sdd-workflow/
+│   ├── SKILL.md
+│   └── evaluation/
+│       └── evaluation_criteria.md
+└── ...
 ```
 
 ## 普遍原則（18項目）
@@ -202,6 +235,26 @@ description: スキルの説明。Use when「〇〇したい」と言われた�
 ### Hooksの追加
 
 `settings.json` の `hooks` セクションを編集してください。
+
+**注意**: 本基盤のHooksは `python3` を使用しています。Hooksを有効にする場合はPython3がインストールされている必要があります。
+
+```bash
+# Python3がインストールされているか確認
+python3 --version
+
+# Windowsの場合は以下も確認
+python --version
+```
+
+## 詳細ドキュメント
+
+より詳しい解説は `Docs/` ディレクトリを参照してください。
+
+| ドキュメント | 内容 | 所要時間 |
+|-------------|------|---------|
+| [クイックリファレンス](./Docs/quick-reference.md) | コマンド一覧、チートシート | 3分 |
+| [実用ガイド](./Docs/usage-guide.md) | シナリオ別の使い方、ベストプラクティス | 15-20分 |
+| [思想と実現内容](./Docs/claude-code-foundation-overview.md) | 設計思想、18の普遍原則の詳細 | 30-40分 |
 
 ## 参考資料
 
