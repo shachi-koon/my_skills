@@ -9,7 +9,7 @@
 - **普遍原則**: どのプロジェクトでも守るべき18のルール
 - **推奨Skills**: お任せ時の標準的なワークフロー（8つ）
 - **壁打ちSkills**: プロジェクトごとに対話で決める（6つ）
-- **Agents**: 品質保証・進捗管理・技術調査のサブエージェント（3つ）
+- **Agents**: 品質保証・進捗管理・技術調査・並列リサーチのサブエージェント（5つ）
 - **Hooks**: 自動フォーマット、機密ファイル保護
 
 ## 思想
@@ -38,7 +38,9 @@
 ├── agents/                      # サブエージェント
 │   ├── qa-general.md            # 品質保証エージェント
 │   ├── status-updater.md        # 進捗管理エージェント
-│   └── web-researcher.md        # 技術調査エージェント
+│   ├── web-researcher.md        # 技術調査エージェント
+│   ├── chatgpt-parallel-research.md  # ChatGPT並列リサーチ（オプション）
+│   └── x-automation-agent.md    # X/Grok自動化（オプション）
 │
 └── skills/
     ├── 推奨Skills（自動呼び出し）
@@ -122,13 +124,21 @@ cp -r .claude-foundation/agents .claude/agents
 | `qa-general` | 成果物の品質チェック | レビュー依頼時、QC実施時 |
 | `status-updater` | 進捗状況の追跡・更新 | フェーズ完了時、進捗確認時 |
 | `web-researcher` | 技術情報の検証・調査 | API仕様確認、ライブラリ調査、実現可能性確認時 |
+| `chatgpt-parallel-research` | ChatGPT並列検索・深掘り調査 | 横断検索、ブレスト、技術調査時（オプション） |
+| `x-automation-agent` | X/Grok操作・トレンド収集 | SNS情報収集、トレンド調査時（オプション） |
 
 **呼び出し例:**
 ```
 「品質チェックして」→ qa-general が品質検査を実施
 「進捗を確認して」→ status-updater が状況を整理
 「〇〇のAPI仕様を調査して」→ web-researcher が技術情報を調査
+「横断検索して」→ chatgpt-parallel-research が並列検索（Browser Controller必須）
+「Xのトレンドを調べて」→ x-automation-agent がSNS情報収集（Browser Controller必須）
 ```
+
+**オプションエージェントの前提条件:**
+- `chatgpt-parallel-research`: Browser Controller Chrome拡張機能、ChatGPTログイン済み
+- `x-automation-agent`: Browser Controller Chrome拡張機能、X（Twitter）ログイン済み
 
 **qa-generalの出力例:**
 ```

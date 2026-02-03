@@ -313,15 +313,17 @@ Claude: [document-generatorスキルが自動発動]
 
 ## エージェントの活用
 
-### 3つのサブエージェント
+### 5つのサブエージェント
 
-スキルとは別に、品質保証・進捗管理・技術調査を担う3つのサブエージェントが用意されています。
+スキルとは別に、品質保証・進捗管理・技術調査・並列リサーチを担う5つのサブエージェントが用意されています。
 
 | Agent | 役割 | 使用タイミング |
 |-------|------|---------------|
 | `qa-general` | 成果物の品質チェック | レビュー依頼時、QC実施時 |
 | `status-updater` | 進捗状況の追跡・更新 | フェーズ完了時、進捗確認時 |
 | `web-researcher` | 技術情報の検証・調査 | API仕様確認、ライブラリ調査時 |
+| `chatgpt-parallel-research` | ChatGPT並列検索・深掘り調査 | 横断検索、ブレスト、技術調査時（オプション） |
+| `x-automation-agent` | X/Grok操作・トレンド収集 | SNS情報収集、トレンド調査時（オプション） |
 
 ### qa-general（品質保証エージェント）
 
@@ -360,6 +362,42 @@ Claude: [web-researcherエージェントが発動]
 - 公式ドキュメント優先で検索
 - 情報の確度（高/中/低）を判定
 - ソースURLを付記して報告
+```
+
+### chatgpt-parallel-research（ChatGPT並列リサーチ）【オプション】
+
+Browser Controller経由でChatGPTを並列操作し、横断検索・ブレストを実行します。
+
+**前提条件:**
+- Browser Controller Chrome拡張機能
+- ChatGPTログイン済み
+- chatgpt_multi.py スクリプト
+
+```
+あなた: 横断検索して
+
+Claude: [chatgpt-parallel-researchエージェントが発動]
+- 3並列以上で複数観点から検索
+- 結果を統合分析
+- Markdown形式で保存
+```
+
+### x-automation-agent（X/Grok自動化）【オプション】
+
+Browser Controller経由でX（Twitter）を自動操作し、Grok並列検索も実行します。
+
+**前提条件:**
+- Browser Controller Chrome拡張機能
+- Xログイン済み
+- ブリッジサーバー起動（ws://localhost:9224）
+
+```
+あなた: Grokで並列検索して
+
+Claude: [x-automation-agentが発動]
+- Grok並列検索を実行
+- DeepThink/DeepSearchも利用可能
+- 結果をMarkdown形式で保存
 ```
 
 ### 評価基準（Evaluation Criteria）

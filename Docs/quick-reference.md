@@ -192,13 +192,19 @@
 
 ## エージェント（Agents）
 
-### 3つのサブエージェント
+### 5つのサブエージェント
 
 | Agent | 役割 | 呼び出し例 |
 |-------|------|----------|
 | `qa-general` | 成果物の品質チェック | 「品質チェックして」 |
 | `status-updater` | 進捗状況の追跡・更新 | 「進捗を確認して」 |
 | `web-researcher` | 技術情報の検証・調査 | 「〇〇のAPI仕様を調査して」 |
+| `chatgpt-parallel-research` | ChatGPT並列検索 | 「横断検索して」（オプション） |
+| `x-automation-agent` | X/Grok自動化 | 「Grokで検索して」（オプション） |
+
+**オプションエージェントの前提条件:**
+- Browser Controller Chrome拡張機能がインストール・有効化されている
+- 対象サービス（ChatGPT/X）にログイン済み
 
 ### 評価基準（Evaluation Criteria）
 
