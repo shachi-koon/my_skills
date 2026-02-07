@@ -143,7 +143,7 @@
 | 概要 | db-design.md記載の全テーブル作成マイグレーション |
 | 成果物 | マイグレーションファイル（11テーブル分） |
 | 確認方法 | 全テーブル作成、インデックス・FK確認 |
-| Done条件 | db-design.md v0.4と一致するスキーマ構築完了 |
+| Done条件 | db-design.md v0.6と一致するスキーマ構築完了 |
 | 依存タスク | 2.1 |
 | 見積もり | 2日 |
 
@@ -691,8 +691,8 @@ graph TD
 
 | 設計書 | バージョン |
 |--------|-----------|
-| api-design.md | v0.5 |
-| db-design.md | v0.4 |
+| api-design.md | v0.7 |
+| db-design.md | v0.6 |
 | infra-design.md | v0.3 |
 | screen-design.md | v0.2 |
 | coding-rules.md | v0.2 |
@@ -706,3 +706,5 @@ graph TD
 | 2026-02-05 | 0.1 | 初版作成（全タスク定義、依存関係整理） | Claude |
 | 2026-02-05 | 0.2 | QC対応: 期限間近アラートジョブ追加、セキュリティテスト分割、依存関係図Mermaid化、Done条件明確化 | Claude |
 | 2026-02-05 | 0.3 | QC対応: CloudFront/WAF明記、クリティカルパス追加、マイルストーン追加、全タスク見積もり追加 | Claude |
+| 2026-02-07 | 0.4 | 設計書バージョン参照更新（api-design v0.7, db-design v0.5） | Claude |
+| 2026-02-07 | 0.5 | db-design.md v0.6参照に更新 | Claude |

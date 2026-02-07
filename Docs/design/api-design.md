@@ -90,9 +90,9 @@
   "data": [...],
   "pagination": {
     "page": 1,
-    "per_page": 20,
-    "total_pages": 5,
-    "total_count": 100
+    "perPage": 20,
+    "totalPages": 5,
+    "totalCount": 100
   }
 }
 ```
@@ -188,7 +188,7 @@
 #### リクエスト
 ```json
 {
-  "category_id": "cat_001",
+  "categoryId": "cat_001",
   "subject": "商品の返品について",
   "body": "先日購入した商品を返品したいのですが..."
 }
@@ -198,12 +198,12 @@
 ```json
 {
   "id": "inq_abc123",
-  "inquiry_number": "INQ-20260204-0001",
-  "service_id": "svc_001",
-  "category_id": "cat_001",
+  "inquiryNumber": "INQ-20260204-0001",
+  "serviceId": "svc_001",
+  "categoryId": "cat_001",
   "subject": "商品の返品について",
   "status": "pending",
-  "created_at": "2026-02-04T10:00:00Z"
+  "createdAt": "2026-02-04T10:00:00Z"
 }
 ```
 
@@ -217,15 +217,15 @@
 #### クエリパラメータ
 | パラメータ | 型 | 説明 |
 |-----------|------|------|
-| service_id | string | サービスIDでフィルタ |
+| serviceId | string | サービスIDでフィルタ |
 | status | string | ステータスでフィルタ（pending/in_progress/answered/completed/on_hold） |
-| category_id | string | カテゴリIDでフィルタ |
-| assigned_to | string | 担当者IDでフィルタ（`unassigned`で未アサイン） |
+| categoryId | string | カテゴリIDでフィルタ |
+| assignedTo | string | 担当者IDでフィルタ（`unassigned`で未アサイン） |
 | deadline | string | 期限でフィルタ（overdue/today/soon/within） |
 | q | string | 検索クエリ（問い合わせ番号、件名、本文） |
 | page | number | ページ番号（デフォルト: 1） |
-| per_page | number | 1ページあたり件数（デフォルト: 20、最大: 100） |
-| sort | string | ソート項目（created_at/updated_at/deadline） |
+| perPage | number | 1ページあたり件数（デフォルト: 20、最大: 100） |
+| sort | string | ソート項目（createdAt/updatedAt/deadline） |
 | order | string | ソート順（asc/desc） |
 
 #### レスポンス（200 OK）
@@ -234,24 +234,24 @@
   "data": [
     {
       "id": "inq_abc123",
-      "inquiry_number": "INQ-20260204-0001",
+      "inquiryNumber": "INQ-20260204-0001",
       "service": { "id": "svc_001", "name": "ECサイト" },
       "category": { "id": "cat_001", "name": "返品・交換" },
       "subject": "商品の返品について",
       "status": "pending",
       "deadline": "2026-02-06T17:00:00Z",
-      "deadline_status": "within",
-      "assigned_to": null,
-      "end_user": { "id": "usr_001", "name": "山田太郎", "email": "yamada@example.com" },
-      "created_at": "2026-02-04T10:00:00Z",
-      "updated_at": "2026-02-04T10:00:00Z"
+      "deadlineStatus": "within",
+      "assignedTo": null,
+      "endUser": { "id": "usr_001", "name": "山田太郎", "email": "yamada@example.com" },
+      "createdAt": "2026-02-04T10:00:00Z",
+      "updatedAt": "2026-02-04T10:00:00Z"
     }
   ],
   "pagination": {
     "page": 1,
-    "per_page": 20,
-    "total_pages": 5,
-    "total_count": 100
+    "perPage": 20,
+    "totalPages": 5,
+    "totalCount": 100
   }
 }
 ```
@@ -265,27 +265,27 @@
 {
   "summary": {
     "pending": 15,
-    "in_progress": 23,
+    "inProgress": 23,
     "answered": 8,
-    "on_hold": 3
+    "onHold": 3
   },
   "alerts": {
     "overdue": 5,
-    "due_soon": 12,
-    "long_pending": 7,
+    "dueSoon": 12,
+    "longPending": 7,
     "unassigned": 10
   },
   "metrics": {
-    "avg_first_response_time_hours": 4.5,
-    "avg_resolution_time_hours": 24.2
+    "avgFirstResponseTimeHours": 4.5,
+    "avgResolutionTimeHours": 24.2
   },
-  "by_service": [
-    { "service_id": "svc_001", "name": "ECサイト", "count": 45 },
-    { "service_id": "svc_002", "name": "会員アプリ", "count": 30 }
+  "byService": [
+    { "serviceId": "svc_001", "name": "ECサイト", "count": 45 },
+    { "serviceId": "svc_002", "name": "会員アプリ", "count": 30 }
   ],
-  "by_category": [
-    { "category_id": "cat_001", "name": "返品・交換", "count": 20 },
-    { "category_id": "cat_002", "name": "配送", "count": 15 }
+  "byCategory": [
+    { "categoryId": "cat_001", "name": "返品・交換", "count": 20 },
+    { "categoryId": "cat_002", "name": "配送", "count": 15 }
   ],
   "period": {
     "start": "2026-02-01T00:00:00Z",
@@ -323,7 +323,7 @@
 {
   "id": "inq_abc123",
   "status": "in_progress",
-  "updated_at": "2026-02-04T11:00:00Z"
+  "updatedAt": "2026-02-04T11:00:00Z"
 }
 ```
 
@@ -343,8 +343,8 @@
 {
   "id": "inq_abc123",
   "deadline": "2026-02-10T17:00:00Z",
-  "deadline_status": "within",
-  "updated_at": "2026-02-04T12:00:00Z"
+  "deadlineStatus": "within",
+  "updatedAt": "2026-02-04T12:00:00Z"
 }
 ```
 
@@ -367,9 +367,9 @@
   "id": "att_xyz789",
   "filename": "receipt.pdf",
   "size": 524288,
-  "content_type": "application/pdf",
-  "virus_scan_status": "pending",
-  "created_at": "2026-02-04T12:00:00Z"
+  "contentType": "application/pdf",
+  "virusScanStatus": "pending",
+  "createdAt": "2026-02-04T12:00:00Z"
 }
 ```
 
@@ -455,3 +455,5 @@
 | 2026-02-05 | 0.3 | マイクロサービス構成追加、コーディングルール作成 | Claude |
 | 2026-02-05 | 0.4 | エンドユーザー向け添付ファイルAPI追加 | Claude |
 | 2026-02-05 | 0.5 | エンドユーザー向け添付ファイルダウンロードAPI追加 | Claude |
+| 2026-02-07 | 0.6 | JSONフィールドをcamelCaseに統一（coding-rules.md準拠） | Claude |
+| 2026-02-07 | 0.7 | クエリパラメータをcamelCaseに統一 | Claude |

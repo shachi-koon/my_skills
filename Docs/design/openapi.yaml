@@ -3,7 +3,7 @@ info:
   title: お問い合わせ管理基盤SaaS API
   description: |
     複数サービスの問い合わせを一元管理するSaaSプラットフォームのAPI仕様書
-  version: 0.3.0
+  version: 0.7.0
   contact:
     name: API Support
     email: support@inquiry-platform.example.com

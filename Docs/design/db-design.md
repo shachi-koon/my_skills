@@ -79,12 +79,14 @@
 **business_hours JSONBスキーマ例**
 ```json
 {
-  "weekdays": [1, 2, 3, 4, 5],
+  "workdays": [1, 2, 3, 4, 5],
   "start_time": "09:00",
   "end_time": "18:00",
   "use_national_holidays": true
 }
 ```
+
+**注記**: JSONB内部フィールドはDBの一部としてsnake_caseを使用。APIレスポンス時はcamelCaseに変換（coding-rules.md 4.3節参照）。
 
 ---
 
@@ -396,3 +398,5 @@ CREATE POLICY service_isolation ON inquiries
 | 2026-02-04 | 0.2 | 設計選択理由（決定ログ）追加 | Claude |
 | 2026-02-05 | 0.3 | notification_queueにtenant_id追加、messages設計方針（初回投稿本文格納）追記 | Claude |
 | 2026-02-05 | 0.4 | end_usersとservicesの関係についてCognito Groups依存の設計方針追記 | Claude |
+| 2026-02-07 | 0.5 | business_hours JSONBスキーマのweekdays→workdaysに統一（openapi.yaml準拠） | Claude |
+| 2026-02-07 | 0.6 | JSONB→API変換の注記追加（coding-rules.md 4.3節参照） | Claude |
