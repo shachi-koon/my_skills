@@ -1,0 +1,1726 @@
+openapi: 3.0.3
+info:
+  title: お問い合わせ管理基盤SaaS API
+  description: |
+    複数サービスの問い合わせを一元管理するSaaSプラットフォームのAPI仕様書
+  version: 0.3.0
+  contact:
+    name: API Support
+    email: support@inquiry-platform.example.com
+
+servers:
+  - url: https://api.inquiry-platform.example.com/api/v1
+    description: Production
+  - url: https://api-staging.inquiry-platform.example.com/api/v1
+    description: Staging
+
+tags:
+  - name: User
+    description: エンドユーザー向けAPI
+  - name: Admin
+    description: オペレーター/管理者向けAPI
+  - name: Tenant
+    description: テナント管理者向けAPI
+  - name: System
+    description: システム管理者向けAPI
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Cognito発行のJWTトークン
+
+  schemas:
+    # 共通
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        perPage:
+          type: integer
+          example: 20
+        totalPages:
+          type: integer
+          example: 5
+        totalCount:
+          type: integer
+          example: 100
+
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          example: "https://api.inquiry-platform.example.com/errors/validation-error"
+        title:
+          type: string
+          example: "Validation Error"
+        status:
+          type: integer
+          example: 400
+        detail:
+          type: string
+          example: "件名は100文字以内で入力してください"
+        instance:
+          type: string
+          example: "/api/v1/inquiries"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    RateLimitError:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "https://api.inquiry-platform.example.com/errors/rate-limit-exceeded"
+        title:
+          type: string
+          example: "Rate Limit Exceeded"
+        status:
+          type: integer
+          example: 429
+        detail:
+          type: string
+          example: "リクエスト数が上限を超えました。しばらくしてから再度お試しください。"
+        retryAfter:
+          type: integer
+          description: リトライまでの待機秒数
+          example: 60
+
+    # 問い合わせ関連
+    InquiryStatus:
+      type: string
+      enum: [pending, in_progress, answered, completed, on_hold]
+      description: |
+        - pending: 未対応
+        - in_progress: 対応中
+        - answered: 回答済み
+        - completed: 完了
+        - on_hold: 保留
+
+    DeadlineStatus:
+      type: string
+      enum: [overdue, today, soon, within]
+      description: |
+        - overdue: 期限超過
+        - today: 本日期限
+        - soon: 期限間近（24時間以内）
+        - within: 期限内
+
+    InquiryCreateRequest:
+      type: object
+      required:
+        - categoryId
+        - subject
+        - body
+      properties:
+        categoryId:
+          type: string
+          example: "cat_001"
+        subject:
+          type: string
+          maxLength: 100
+          example: "商品の返品について"
+        body:
+          type: string
+          maxLength: 5000
+          example: "先日購入した商品を返品したいのですが..."
+
+    InquiryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "inq_abc123"
+        inquiryNumber:
+          type: string
+          example: "INQ-20260204-0001"
+        service:
+          $ref: '#/components/schemas/ServiceSummary'
+        category:
+          $ref: '#/components/schemas/CategorySummary'
+        subject:
+          type: string
+        status:
+          $ref: '#/components/schemas/InquiryStatus'
+        deadline:
+          type: string
+          format: date-time
+        deadlineStatus:
+          $ref: '#/components/schemas/DeadlineStatus'
+        assignedTo:
+          $ref: '#/components/schemas/UserSummary'
+        endUser:
+          $ref: '#/components/schemas/UserSummary'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    InquiryDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/InquiryResponse'
+        - type: object
+          properties:
+            messages:
+              type: array
+              items:
+                $ref: '#/components/schemas/MessageResponse'
+
+    InquiryListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/InquiryResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # メッセージ関連
+    MessageCreateRequest:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          maxLength: 5000
+
+    InternalMemoCreateRequest:
+      type: object
+      required:
+        - body
+      properties:
+        body:
+          type: string
+          maxLength: 5000
+
+    MessageResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        inquiryId:
+          type: string
+        senderType:
+          type: string
+          enum: [end_user, operator]
+        sender:
+          $ref: '#/components/schemas/UserSummary'
+        body:
+          type: string
+        isInternalMemo:
+          type: boolean
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttachmentResponse'
+        createdAt:
+          type: string
+          format: date-time
+
+    # 添付ファイル
+    AttachmentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        size:
+          type: integer
+          description: ファイルサイズ（バイト）
+        contentType:
+          type: string
+        virusScanStatus:
+          type: string
+          enum: [pending, clean, infected]
+        downloadUrl:
+          type: string
+          format: uri
+          description: 署名付きダウンロードURL（有効期限1時間）
+        createdAt:
+          type: string
+          format: date-time
+
+    # 担当者アサイン
+    AssigneeChangeRequest:
+      type: object
+      required:
+        - assigneeId
+      properties:
+        assigneeId:
+          type: string
+          description: アサインする担当者ID
+
+    # 期限変更
+    DeadlineChangeRequest:
+      type: object
+      required:
+        - deadline
+      properties:
+        deadline:
+          type: string
+          format: date-time
+
+    # ステータス変更
+    StatusChangeRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/InquiryStatus'
+
+    # サービス・カテゴリ
+    ServiceSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    ServiceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ServiceCreateRequest:
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 50
+          pattern: "^[a-z0-9_-]+$"
+        description:
+          type: string
+          maxLength: 500
+
+    ServiceUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        isActive:
+          type: boolean
+
+    CategorySummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        slaHours:
+          type: integer
+          description: SLA時間（営業時間）
+        sortOrder:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    CategoryCreateRequest:
+      type: object
+      required:
+        - name
+        - slaHours
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        slaHours:
+          type: integer
+          minimum: 1
+        sortOrder:
+          type: integer
+          default: 0
+
+    # ユーザー
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    AdminUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [operator, service_admin, tenant_admin]
+        serviceIds:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        lastLoginAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    UserInviteRequest:
+      type: object
+      required:
+        - email
+        - name
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          maxLength: 100
+        role:
+          type: string
+          enum: [operator, service_admin, tenant_admin]
+        serviceIds:
+          type: array
+          items:
+            type: string
+          description: operatorまたはservice_adminの場合に指定
+
+    # ダッシュボード
+    DashboardResponse:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            pending:
+              type: integer
+            inProgress:
+              type: integer
+            answered:
+              type: integer
+            onHold:
+              type: integer
+        alerts:
+          type: object
+          properties:
+            overdue:
+              type: integer
+            dueSoon:
+              type: integer
+            longPending:
+              type: integer
+            unassigned:
+              type: integer
+        metrics:
+          type: object
+          properties:
+            avgFirstResponseTimeHours:
+              type: number
+            avgResolutionTimeHours:
+              type: number
+        byService:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceId:
+                type: string
+              name:
+                type: string
+              count:
+                type: integer
+        byCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              categoryId:
+                type: string
+              name:
+                type: string
+              count:
+                type: integer
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+
+    # テナント
+    TenantResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        plan:
+          type: string
+          enum: [starter, professional, enterprise]
+        status:
+          type: string
+          enum: [active, suspended, cancelled]
+        contactEmail:
+          type: string
+          format: email
+        startDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+
+    TenantCreateRequest:
+      type: object
+      required:
+        - name
+        - plan
+        - contactEmail
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        plan:
+          type: string
+          enum: [starter, professional, enterprise]
+        contactEmail:
+          type: string
+          format: email
+        startDate:
+          type: string
+          format: date
+
+    # 営業時間設定
+    BusinessHoursResponse:
+      type: object
+      properties:
+        timezone:
+          type: string
+          example: "Asia/Tokyo"
+        workdays:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 6
+          example: [1, 2, 3, 4, 5]
+        startTime:
+          type: string
+          example: "09:00"
+        endTime:
+          type: string
+          example: "18:00"
+        useNationalHolidays:
+          type: boolean
+        additionalHolidays:
+          type: array
+          items:
+            type: string
+            format: date
+
+    BusinessHoursUpdateRequest:
+      type: object
+      properties:
+        timezone:
+          type: string
+        workdays:
+          type: array
+          items:
+            type: integer
+        startTime:
+          type: string
+        endTime:
+          type: string
+        useNationalHolidays:
+          type: boolean
+        additionalHolidays:
+          type: array
+          items:
+            type: string
+            format: date
+
+    # エクスポート
+    ExportJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        downloadUrl:
+          type: string
+          format: uri
+          description: 完了時のみ。署名付きURL（有効期限24時間）
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ===========================================
+  # エンドユーザーAPI
+  # ===========================================
+  /user/inquiries:
+    post:
+      tags: [User]
+      summary: 問い合わせ投稿
+      operationId: createInquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InquiryCreateRequest'
+      responses:
+        '201':
+          description: 問い合わせ作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryResponse'
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: 認証エラー
+        '429':
+          description: レート制限超過
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: リトライまでの待機秒数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+
+    get:
+      tags: [User]
+      summary: 問い合わせ履歴一覧
+      operationId: listUserInquiries
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InquiryStatus'
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryListResponse'
+
+  /user/inquiries/{id}:
+    get:
+      tags: [User]
+      summary: 問い合わせ詳細
+      operationId: getUserInquiry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailResponse'
+        '404':
+          description: 問い合わせが見つからない
+
+  /user/inquiries/{id}/messages:
+    post:
+      tags: [User]
+      summary: 追加情報送信
+      operationId: createUserMessage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCreateRequest'
+      responses:
+        '201':
+          description: メッセージ作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /user/inquiries/{id}/attachments:
+    post:
+      tags: [User]
+      summary: 添付ファイルアップロード（エンドユーザー）
+      operationId: uploadUserAttachment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: アップロード成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachmentResponse'
+        '400':
+          description: バリデーションエラー（ファイルサイズ超過、形式不正等）
+        '413':
+          description: ファイルサイズ超過（10MB超）
+
+  /user/attachments/{id}/download:
+    get:
+      tags: [User]
+      summary: 添付ファイルダウンロード（エンドユーザー）
+      operationId: downloadUserAttachment
+      description: 自分の問い合わせに関連する添付ファイルのみダウンロード可能
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: S3署名付きURLへリダイレクト
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '403':
+          description: アクセス権限なし（他ユーザーの添付ファイル）またはウイルス検出済みファイル
+        '404':
+          description: ファイルが見つからない
+
+  /user/services/{code}/categories:
+    get:
+      tags: [User]
+      summary: カテゴリ一覧取得
+      operationId: listCategoriesByServiceCode
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CategorySummary'
+
+  # ===========================================
+  # 管理者API
+  # ===========================================
+  /admin/inquiries:
+    get:
+      tags: [Admin]
+      summary: 問い合わせ一覧（フィルタ対応）
+      operationId: listAdminInquiries
+      parameters:
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InquiryStatus'
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+        - name: assignedTo
+          in: query
+          schema:
+            type: string
+          description: 担当者ID。`unassigned`で未アサインをフィルタ
+        - name: deadline
+          in: query
+          schema:
+            $ref: '#/components/schemas/DeadlineStatus'
+        - name: q
+          in: query
+          schema:
+            type: string
+          description: 検索クエリ（問い合わせ番号、件名、本文）
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, deadline]
+            default: createdAt
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryListResponse'
+
+  /admin/inquiries/{id}:
+    get:
+      tags: [Admin]
+      summary: 問い合わせ詳細
+      operationId: getAdminInquiry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryDetailResponse'
+        '404':
+          description: 問い合わせが見つからない
+
+  /admin/inquiries/{id}/messages:
+    post:
+      tags: [Admin]
+      summary: 回答送信
+      operationId: createAdminMessage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageCreateRequest'
+      responses:
+        '201':
+          description: 回答送信成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /admin/inquiries/{id}/internal-memos:
+    post:
+      tags: [Admin]
+      summary: 内部メモ追加
+      operationId: createInternalMemo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalMemoCreateRequest'
+      responses:
+        '201':
+          description: 内部メモ作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /admin/inquiries/{id}/assignee:
+    patch:
+      tags: [Admin]
+      summary: 担当者アサイン
+      operationId: changeAssignee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssigneeChangeRequest'
+      responses:
+        '200':
+          description: アサイン成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryResponse'
+
+  /admin/inquiries/{id}/status:
+    patch:
+      tags: [Admin]
+      summary: ステータス変更
+      operationId: changeInquiryStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusChangeRequest'
+      responses:
+        '200':
+          description: ステータス変更成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryResponse'
+        '400':
+          description: 不正なステータス遷移
+
+  /admin/inquiries/{id}/deadline:
+    patch:
+      tags: [Admin]
+      summary: 期限変更
+      operationId: changeDeadline
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeadlineChangeRequest'
+      responses:
+        '200':
+          description: 期限変更成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InquiryResponse'
+
+  /admin/inquiries/{id}/attachments:
+    post:
+      tags: [Admin]
+      summary: 添付ファイルアップロード（管理者）
+      operationId: uploadAdminAttachment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: アップロード成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachmentResponse'
+        '400':
+          description: バリデーションエラー
+        '413':
+          description: ファイルサイズ超過（10MB超）
+
+  /admin/attachments/{id}/download:
+    get:
+      tags: [Admin]
+      summary: 添付ファイルダウンロード
+      operationId: downloadAttachment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '302':
+          description: S3署名付きURLへリダイレクト
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '403':
+          description: ウイルス検出済みファイル
+        '404':
+          description: ファイルが見つからない
+
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: ダッシュボードデータ
+      operationId: getDashboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month, custom]
+            default: week
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: period=customの場合のみ
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: period=customの場合のみ
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+
+  # ===========================================
+  # テナント管理者API
+  # ===========================================
+  /tenant/services:
+    get:
+      tags: [Tenant]
+      summary: サービス一覧
+      operationId: listServices
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceResponse'
+
+    post:
+      tags: [Tenant]
+      summary: サービス登録
+      operationId: createService
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceCreateRequest'
+      responses:
+        '201':
+          description: サービス作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+
+  /tenant/services/{id}:
+    get:
+      tags: [Tenant]
+      summary: サービス詳細
+      operationId: getService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+
+    put:
+      tags: [Tenant]
+      summary: サービス更新
+      operationId: updateService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceResponse'
+
+    delete:
+      tags: [Tenant]
+      summary: サービス削除
+      operationId: deleteService
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 削除成功
+
+  /tenant/services/{id}/categories:
+    get:
+      tags: [Tenant]
+      summary: カテゴリ一覧
+      operationId: listCategories
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CategoryResponse'
+
+    post:
+      tags: [Tenant]
+      summary: カテゴリ登録
+      operationId: createCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '201':
+          description: カテゴリ作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+
+  /tenant/services/{id}/categories/{cid}:
+    put:
+      tags: [Tenant]
+      summary: カテゴリ更新
+      operationId: updateCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+
+    delete:
+      tags: [Tenant]
+      summary: カテゴリ削除
+      operationId: deleteCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 削除成功
+
+  /tenant/users:
+    get:
+      tags: [Tenant]
+      summary: ユーザー一覧
+      operationId: listUsers
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [operator, service_admin, tenant_admin]
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminUserResponse'
+
+  /tenant/users/invite:
+    post:
+      tags: [Tenant]
+      summary: ユーザー招待
+      operationId: inviteUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInviteRequest'
+      responses:
+        '201':
+          description: 招待成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserResponse'
+
+  /tenant/users/{id}:
+    put:
+      tags: [Tenant]
+      summary: ユーザー更新
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                role:
+                  type: string
+                  enum: [operator, service_admin, tenant_admin]
+                serviceIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUserResponse'
+
+    delete:
+      tags: [Tenant]
+      summary: ユーザー無効化
+      operationId: deactivateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 無効化成功
+
+  /tenant/dashboard:
+    get:
+      tags: [Tenant]
+      summary: テナント全体ダッシュボード
+      operationId: getTenantDashboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [today, week, month, custom]
+            default: week
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+
+  /tenant/settings/business-hours:
+    get:
+      tags: [Tenant]
+      summary: 営業時間設定取得
+      operationId: getBusinessHours
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessHoursResponse'
+
+    put:
+      tags: [Tenant]
+      summary: 営業時間設定更新
+      operationId: updateBusinessHours
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BusinessHoursUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BusinessHoursResponse'
+
+  # ===========================================
+  # システム管理者API
+  # ===========================================
+  /system/tenants:
+    get:
+      tags: [System]
+      summary: テナント一覧
+      operationId: listTenants
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, suspended, cancelled]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TenantResponse'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [System]
+      summary: テナント登録
+      operationId: createTenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreateRequest'
+      responses:
+        '201':
+          description: テナント作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+
+  /system/tenants/{id}:
+    get:
+      tags: [System]
+      summary: テナント詳細
+      operationId: getTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+
+    put:
+      tags: [System]
+      summary: テナント更新
+      operationId: updateTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                plan:
+                  type: string
+                  enum: [starter, professional, enterprise]
+                contactEmail:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+
+    delete:
+      tags: [System]
+      summary: テナント解約（論理削除）
+      operationId: cancelTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 解約成功
+
+  /system/tenants/{id}/status:
+    patch:
+      tags: [System]
+      summary: テナントステータス変更
+      operationId: changeTenantStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [active, suspended, cancelled]
+      responses:
+        '200':
+          description: ステータス変更成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+
+  /system/tenants/{id}/export:
+    post:
+      tags: [System]
+      summary: データエクスポートジョブ開始
+      operationId: startExportJob
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format:
+                  type: string
+                  enum: [csv, json]
+                  default: csv
+                includeAttachments:
+                  type: boolean
+                  default: false
+      responses:
+        '202':
+          description: ジョブ開始（非同期処理）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobResponse'
+
+  /system/tenants/{id}/export/{jobId}:
+    get:
+      tags: [System]
+      summary: エクスポートジョブ状況
+      operationId: getExportJobStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobResponse'
+
+  /system/monitoring:
+    get:
+      tags: [System]
+      summary: システム監視ダッシュボード
+      operationId: getSystemMonitoring
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalTenants:
+                    type: integer
+                  activeTenants:
+                    type: integer
+                  totalInquiries:
+                    type: integer
+                  inquiriesToday:
+                    type: integer
+                  systemHealth:
+                    type: string
+                    enum: [healthy, degraded, critical]
+                  services:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        status:
+                          type: string
+                          enum: [up, down, degraded]
+                        latencyMs:
+                          type: integer
